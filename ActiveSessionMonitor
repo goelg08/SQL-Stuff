@@ -1,0 +1,11 @@
+
+--Every second it colects information about active sessions into master.dbo.[SessionStats]  table. The job will atomatically shuts down on mention date in WHILE loop
+while 1=1 and (getdate() < <<Date when you want to end the Execution>>)
+begin
+	insert SessionStats
+	select session_id, DB_NAME(database_id) as dbname, login_time,  Getdate() as Timestamp, host_name, program_name, login_name
+	FROM sys.dm_exec_sessions eS 
+	where login_name not in  (', 'sa', 'NT AUTHORITY\SYSTEM', 'distributor_admin', 'NT SERVICE\SQLTELEMETRY', 'tablesize_reader') --Exclude all logins you don't want to consider
+and status <> 'sleeping'
+waitfor delay '00:01'
+end
